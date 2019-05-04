@@ -1,17 +1,12 @@
 #include "opencv2/core/core.hpp"
-
-
 #include "opencv2/imgproc/imgproc.hpp"
-
-
 #include "opencv2/video/tracking.hpp"
 #include "opencv2/highgui/highgui.hpp"
-
-
 #include "opencv2/core/opengl.hpp"
-#include "opencv2/video.hpp"     //BackgroundSubtractor在里面
+
 
 #include "detect.h"
+
 
 #include <iostream>
 using namespace std;
@@ -32,12 +27,26 @@ String video_file_name = video_file_name1;
 int camWay = 2; // 0: MVcamera, 1: usb cam  2: vedio
 Mat frame_read, gray;
 VideoCapture capture;
+//#define SERIAL_SEND //是否开启串口并发送数据
+#define SHOW_FRAMES //是否显示图像
+//#define VIDEO_SAVE
 
-
+#ifdef SERIAL_SEND
+    #include "serial.h"
+#endif
 
 int main() //6
 {
-    Mat frame_read, frame_read2gray;
+    #ifdef SERIAL_SEND
+        {//打开串口
+            if(sel.setPara(115200,8,1,'n'))
+             cout<<"config success"<<endl;
+            else
+             cout<<"config failed"<<endl;
+        }
+    #endif
+
+    Mat frame_read;
     Mat threshold_frame;             //二值化图像存贮
     OpenVideoStream(camWay);
     GetCameraPra();
@@ -54,13 +63,20 @@ int main() //6
         morphologyEx(threshold_frame, threshold_frame, MORPH_OPEN, kernel_open);
 
         DetectDafuArmor(threshold_frame, frame_read);
-        imshow("threshold_frame", threshold_frame);
-        imshow("frame_read", frame_read);
+
 
         CoutFps();
-        char c = waitKey(1);
 
 
+        #ifdef SHOW_FRAMES
+            imshow("threshold_frame", threshold_frame);
+            imshow("frame_read", frame_read);
+            char c = waitKey(1);
+        #endif
+
+        #ifdef SERIAL_SEND
+            SendDataToInfantry();
+        #endif
 
     }
 
