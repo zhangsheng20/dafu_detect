@@ -12,11 +12,11 @@
 
 
 //识别条件
-#define max_detect_distance_mm  3000.0f         //最远识别距离，超过此距离滤掉  单位mm
+#define max_detect_distance_mm  3000.0f        //最远识别距离，超过此距离滤掉  单位mm
 #define min_detect_distance_mm  500.0f         //最近识别距离，超过此距离滤掉   单位mm
 #define max_inclination_degree   35.0f         //灯条对角线倾斜角超过一定度数，滤掉  单位度
-#define max_transformation       0.3f        //
-#define max_dafu_transformation  0.5f         //
+#define max_transformation       0.3f          //
+#define max_dafu_transformation  0.5f          //
 
 
 //摄像头的一些参数
@@ -38,18 +38,26 @@ float ShootingDistance =8000;  // 目标的水平距离 单位mm
 
 
 
+int IsDetectDafuCenter = 0;
+
+
+Point2f DafuCenterPitchYawError;               //大符中心坐标
+Point2f ShootArmourPitchYawError;
+
 void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 {
+    Point2f DafuCenter;               //大符中心坐标
+    Point2f ShootArmourCenter;        //    需要打击的装甲板的中心坐标
+    IsDetectDafuCenter = 0;
     int armor_cnt = 0;
     int dafu_center_cnt = 0;
-    int IsDetectDafuCenter = 0;
+
 
     vector<vector<Point>> contours;   //每一组Point点集就是一个轮廓
     vector<Vec4i> hierarcy;           //矩形集合
     Point2f DetectArmourCenter[10];   //所有检测到的装甲板的中心坐标
     Point2f DetectDafuCenter[50];     //可能是大符中心的点
-    Point2f DafuCenter;               //大符中心坐标
-    Point2f ShootArmourCenter;        //    需要打击的装甲板的中心坐标
+
 
     findContours(grayImage, contours, hierarcy, RETR_TREE, CHAIN_APPROX_NONE);
     vector<RotatedRect> box(contours.size()); //定义最小外接矩形集合
@@ -230,11 +238,11 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 
                 if (rotate_rect.size.width > rotate_rect.size.height)
                 {
-                    rotate_rect.size.height = 5;
+                    rotate_rect.size.height = 8;
                 }
                 else
                 {
-                    rotate_rect.size.width = 5;
+                    rotate_rect.size.width = 8;
                 }
                 rotate_rect.points(rect);
 
@@ -244,7 +252,7 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
                 }
 
                 ROI = GetROI(rotate_rect, grayImage);
-                imshow("ROIII" + i, ROI);
+                //imshow("ROIII" + i, ROI);
                 meanStdDev(ROI, means, stddev);
                 if (means.at<double>(0) < MinMean)
                 {
@@ -262,10 +270,30 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 
 
     circle(dstImage, Point(ShootArmourCenter.x, ShootArmourCenter.y), 20, (0, 255, 255), 2);
+
+    ShootArmourPitchYawError = CaculatePitchYawError(ShootArmourCenter.x, ShootArmourCenter.y);
+    DafuCenterPitchYawError=CaculatePitchYawError(DafuCenter.x, DafuCenter.y);
     float b = 0;
 
 
 
+}
+
+
+//计算云台需要转的Yaw和Pitch使得摄像头的中轴线到指定点
+Point2f CaculatePitchYawError(float Pixel_x, float Pixel_y)
+{
+    float PitchAngle = 0;
+    float YawAngle = 0;
+    float tan_pitch = (Pixel_y - myVideoCaptureProperties[CAP_PROP_FRAME_HEIGHT] / 2) / Camera_fy;
+    float tan_yaw = (Pixel_x - myVideoCaptureProperties[CAP_PROP_FRAME_WIDTH] / 2) / Camera_fx;
+
+    PitchAngle = atan(tan_pitch);
+    YawAngle = atan(tan_yaw);
+
+    PitchAngle = -PitchAngle / 3.14 * 180; //转化成单位度
+    YawAngle = -YawAngle / 3.14 * 180; //转化成单位度
+    return Point2f(YawAngle, PitchAngle);
 }
 
 //InputImage为三通道图像，将第三通道threshold
@@ -361,6 +389,8 @@ Mat GetROI(RotatedRect rotate_recte_rect, Mat &grayImage)
                 //设置ROI区域
     Rect rect2;
     rect2.x = rotate_recte_rect.center.x - 50, rect2.y = rotate_recte_rect.center.y - 50, rect2.width = 100, rect2.height = 100;//ROI0 的坐标
+    if(rect2.x>530 ||rect2.x<10 ||rect2.y>290||rect2.y<10)
+        return Mat::zeros(100,100, CV_8UC1);
 
     ROI = img2(rect2);
 
@@ -378,7 +408,7 @@ void GetCameraPra()
     capture.set(CAP_PROP_FRAME_HEIGHT, Camera_frame_height);//高度  分辨率设置成640*400时帧率是240
     capture.set(CAP_PROP_EXPOSURE, 1);
     //capture.set(14, 35);
-    capture.set(CAP_PROP_IRIS, 120);
+    capture.set(CAP_PROP_IRIS, 100);
     capture.set(CAP_PROP_FOURCC, VideoWriter::fourcc('M', 'J', 'P', 'G'));
 
     myVideoCaptureProperties[CAP_PROP_FRAME_WIDTH] = capture.get(CAP_PROP_FRAME_WIDTH);

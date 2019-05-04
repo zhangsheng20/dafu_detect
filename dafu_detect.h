@@ -19,6 +19,9 @@
 using namespace std;
 using namespace cv;
 
+
+//计算云台需要转的Yaw和Pitch使得摄像头的中轴线到指定点
+Point2f CaculatePitchYawError(float Pixel_x, float Pixel_y);
 double CvtRealLenghth2PixelLenghth(double RealLenghth_mm, double Distance_mm);
 double CvtPixelLenghth2RealLenghth(double PixelLenghth, double Distance_mm);
 void DrawEnclosingRexts(Mat &grayImage, Mat &dstImage);
