@@ -24,4 +24,9 @@ double CvtPixelLenghth2RealLenghth(double PixelLenghth, double Distance_mm);
 void DrawEnclosingRexts(Mat &grayImage, Mat &dstImage);
 Point2f CaculatePitchYawError(float Pixel_x, float Pixel_y); //通过像素坐标就算云台需要转过的角度
 float GetPixelLength(Point PixelPointO, Point PixelPointA);
+
+Mat GetROI(RotatedRect rotate_recte_rect, Mat &grayImage);
+void GetCameraPra();
+
+void DetectDafuArmor(Mat &grayImage, Mat &dstImage);
 #endif
