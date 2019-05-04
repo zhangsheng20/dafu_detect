@@ -1,5 +1,5 @@
-#ifndef DETECT_H
-#define DETECT_H
+#ifndef DAFU_DETECT_H
+#define DAFU_DETECT_H
 
 #include <iostream>
 

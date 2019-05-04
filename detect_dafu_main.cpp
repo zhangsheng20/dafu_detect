@@ -5,7 +5,7 @@
 #include "opencv2/core/opengl.hpp"
 
 
-#include "detect.h"
+#include "dafu_detect.h"
 
 
 #include <iostream>
