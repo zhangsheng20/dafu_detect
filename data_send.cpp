@@ -22,8 +22,10 @@ void SendDataToInfantry()
 
 
     char buff[8];
+    ShootArmourPitchYawError.x+=2.0;
+    ShootArmourPitchYawError.y+=3.0;
 
-    Data_Code( (int)(ShootArmourPitchYawError.x*100),  (int)(ShootArmourPitchYawError.y*100));
+    Data_Code( (int)(-ShootArmourPitchYawError.x*100),  (int)(-ShootArmourPitchYawError.y*100));
     for (int i = 0; i < 8; i++)
         buff[i] = data_send_buf[i];
 
@@ -72,8 +74,8 @@ void Data_Code( int x_Data,  int y_Data)
   data_send_buf[1] = length;
   data_send_buf[2] = 0x02;
   //
-  Data_disintegrate_s16(x_Data, &data_send_buf[7], &data_send_buf[8]);
-  Data_disintegrate_s16(y_Data, &data_send_buf[9], &data_send_buf[10]);
+  Data_disintegrate_s16(x_Data, &data_send_buf[3], &data_send_buf[4]);
+  Data_disintegrate_s16(y_Data, &data_send_buf[5], &data_send_buf[6]);
 
 
   //

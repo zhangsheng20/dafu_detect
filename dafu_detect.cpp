@@ -408,7 +408,7 @@ void GetCameraPra()
     capture.set(CAP_PROP_FRAME_HEIGHT, Camera_frame_height);//高度  分辨率设置成640*400时帧率是240
     capture.set(CAP_PROP_EXPOSURE, 1);
     //capture.set(14, 35);
-    capture.set(CAP_PROP_IRIS, 100);
+    capture.set(CAP_PROP_IRIS, 40);
     capture.set(CAP_PROP_FOURCC, VideoWriter::fourcc('M', 'J', 'P', 'G'));
 
     myVideoCaptureProperties[CAP_PROP_FRAME_WIDTH] = capture.get(CAP_PROP_FRAME_WIDTH);
