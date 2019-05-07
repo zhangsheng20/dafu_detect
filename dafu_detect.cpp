@@ -44,6 +44,14 @@ int IsDetectDafuCenter = 0;
 Point2f DafuCenterPitchYawError;               //大符中心坐标
 Point2f ShootArmourPitchYawError;
 
+
+void predcit(float angle_degree)
+{
+    float angle_rad;
+        
+}
+
+
 void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 {
     Point2f DafuCenter;               //大符中心坐标
@@ -55,17 +63,19 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 
     vector<vector<Point>> contours;   //每一组Point点集就是一个轮廓
     vector<Vec4i> hierarcy;           //矩形集合
-    Point2f DetectArmourCenter[10];   //所有检测到的装甲板的中心坐标
-    Point2f DetectDafuCenter[50];     //可能是大符中心的点
+    Point2f DetectArmourCenter[50];   //所有检测到的装甲板的中心坐标
 
 
-    findContours(grayImage, contours, hierarcy, RETR_TREE, CHAIN_APPROX_NONE);
-    vector<RotatedRect> box(contours.size()); //定义最小外接矩形集合
+    findContours(grayImage, contours, hierarcy, RETR_TREE, CHAIN_APPROX_NONE); //找出所有轮廓 包括轮廓关系
+    vector<RotatedRect> box(contours.size()); //定义最小外接矩形集合 ，用于存放装甲板的信息
     vector<RotatedRect> box2(contours.size()); //定义最小外接矩形集合
+    vector<Point2f> DetectDafuCenter(contours.size());     //可能是大符中心的点
+    //float radius[contours.size()];
+
 
     //dstImage = Mat::zeros(grayImage.size(), CV_8UC3);
 
-    //绘制轮廓图 没有子轮廓，但是有父轮廓的
+    //绘制轮廓图 没有子轮廓，但是有父轮廓的——装甲板的第一个特征
     for (int i = 0; i < hierarcy.size(); i++)
     {
         if (hierarcy[i].val[2] == -1 && hierarcy[i].val[3] != -1)
@@ -122,8 +132,8 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
             }
 
 
-            real_dafu_armour_pixel_width = 16;
-            real_dafu_armour_pixel_height = 10;
+            real_dafu_armour_pixel_width = 16; //摄像头标定后修改、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、
+            real_dafu_armour_pixel_height = 10;//摄像头标定后修改、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、
 
 
             if (detect_dafu_armour_pixel_height < real_dafu_armour_pixel_height*(1 + max_dafu_transformation)
@@ -135,6 +145,14 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
                     DetectArmourCenter[armor_cnt] = box[i].center;
                     armor_cnt++;
                 }
+                else
+                {
+                    box[i].center.x = -1;
+                }
+            }
+            else
+            {
+               box[i].center.x = -1;
             }
 
         }
@@ -148,6 +166,10 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
         circle(dstImage, Point(DetectArmourCenter[i].x, DetectArmourCenter[i].y), 10, (0, 0, 255), 4);
     }
 
+
+
+
+ //检测大符中心。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。
 
     //找出 没有子轮廓，也没有父轮廓的中心，圆心在其中
     for (int i = 0; i < hierarcy.size(); i++)
@@ -174,7 +196,7 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 
     //用装甲去匹配圆心
     float real_armour_dafuCenter_pixel_length = 57;
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < contours.size(); i++)
     {
         if (DetectDafuCenter[i].x != -1)
         {
@@ -199,8 +221,10 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
         }
     }
 
+
+
     //画出圆心
-    for (int i = 0; i <50; i++)
+    for (int i = 0; i <contours.size(); i++)
     {
         if (DetectDafuCenter[i].x > 0)
         {

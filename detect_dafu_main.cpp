@@ -31,7 +31,7 @@ VideoCapture capture;
 Serial sel;
 
 
-//#define SERIAL_SEND //是否开启串口并发送数据
+#define SERIAL_SEND //是否开启串口并发送数据
 #define SHOW_FRAMES //是否显示图像
 //#define VIDEO_SAVE
 
@@ -53,7 +53,7 @@ int main() //6
     Mat frame_read;
     Mat threshold_frame;             //二值化图像存贮
     OpenVideoStream(camWay);
-    GetCameraPra();
+   // GetCameraPra();
     while (capture.read(frame_read))
     {
         threshold_frame = mythreshold(frame_read, 75);
