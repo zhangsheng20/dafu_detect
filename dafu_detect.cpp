@@ -63,13 +63,14 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 
     vector<vector<Point>> contours;   //每一组Point点集就是一个轮廓
     vector<Vec4i> hierarcy;           //矩形集合
-    Point2f DetectArmourCenter[50];   //所有检测到的装甲板的中心坐标
+
 
 
     findContours(grayImage, contours, hierarcy, RETR_TREE, CHAIN_APPROX_NONE); //找出所有轮廓 包括轮廓关系
     vector<RotatedRect> box(contours.size()); //定义最小外接矩形集合 ，用于存放装甲板的信息
     vector<RotatedRect> box2(contours.size()); //定义最小外接矩形集合
-    vector<Point2f> DetectDafuCenter(contours.size());     //可能是大符中心的点
+   vector <Point2f> DetectDafuCenter(contours.size());     //可能是大符中心的点
+    Point2f DetectArmourCenter[contours.size()];   //所有检测到的装甲板的中心坐标
     //float radius[contours.size()];
 
 
@@ -430,10 +431,16 @@ void GetCameraPra()
 
     capture.set(CAP_PROP_FRAME_WIDTH, Camera_frame_width);//宽度
     capture.set(CAP_PROP_FRAME_HEIGHT, Camera_frame_height);//高度  分辨率设置成640*400时帧率是240
-    capture.set(CAP_PROP_EXPOSURE, 1);
-    //capture.set(14, 35);
-    capture.set(CAP_PROP_IRIS, 40);
     capture.set(CAP_PROP_FOURCC, VideoWriter::fourcc('M', 'J', 'P', 'G'));
+    capture.set(CAP_PROP_AUTO_EXPOSURE, 0.25);// where 0.25 means "manual exposure, manual iris"
+    capture.set(CAP_PROP_IRIS, 10);
+    capture.set(CAP_PROP_EXPOSURE, -8);
+
+    myVideoCaptureProperties[CAP_PROP_AUTO_EXPOSURE] = capture.get(CAP_PROP_AUTO_EXPOSURE);
+    cout << "CAP_PROP_AUTO_EXPOSURE:" << myVideoCaptureProperties[CAP_PROP_AUTO_EXPOSURE] << endl;
+
+    myVideoCaptureProperties[CAP_PROP_IRIS] = capture.get(CAP_PROP_IRIS);
+    cout << "CAP_PROP_IRIS:" << myVideoCaptureProperties[CAP_PROP_IRIS] << endl;
 
     myVideoCaptureProperties[CAP_PROP_FRAME_WIDTH] = capture.get(CAP_PROP_FRAME_WIDTH);
     cout << "FRAME_WIDTH:" << myVideoCaptureProperties[CAP_PROP_FRAME_WIDTH] << endl;
@@ -445,7 +452,7 @@ void GetCameraPra()
     cout << "CAP_PROP_FPS:" << myVideoCaptureProperties[CAP_PROP_FPS] << endl;
 
 
-    myVideoCaptureProperties[CAP_PROP_BRIGHTNESS] = capture.get(CAP_PROP_BRIGHTNESS);
+    myVideoCaptureProperties[CAP_PROP_BRIGHTNESS] = capture.get(CAP_PROP_BRIGHTNESS); //亮度
     cout << "CAP_PROP_BRIGHTNESS:" << myVideoCaptureProperties[CAP_PROP_BRIGHTNESS] << endl;
 
 

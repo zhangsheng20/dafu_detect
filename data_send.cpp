@@ -67,6 +67,8 @@ void Data_disintegrate_s16(int Data, unsigned char *LData,unsigned char *HData)
 //大符01 yaw pitch
 //自瞄34 yaw pitch
 
+
+
 void Data_Code( int x_Data,  int y_Data)
 {
   int length = 8;

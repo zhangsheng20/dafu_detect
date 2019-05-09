@@ -25,19 +25,21 @@ String video_file_name1= "/home/sheng/桌面/大符视频/2019-5-2_22-48-37.avi"
 String video_file_name = video_file_name1;
 
 
-int camWay = 2; // 0: MVcamera, 1: usb cam  2: vedio
+int camWay = 1; // 0: MVcamera, 1: usb cam  2: vedio
 Mat frame_read, gray;
 VideoCapture capture;
 Serial sel;
 
 
-#define SERIAL_SEND //是否开启串口并发送数据
+//#define SERIAL_SEND //是否开启串口并发送数据
 #define SHOW_FRAMES //是否显示图像
 //#define VIDEO_SAVE
 
 
 
 extern Point2f ShootArmourPitchYawError;        //    需要打击的装甲板的中心坐标
+
+
 
 int main() //6
 {
@@ -53,7 +55,7 @@ int main() //6
     Mat frame_read;
     Mat threshold_frame;             //二值化图像存贮
     OpenVideoStream(camWay);
-   // GetCameraPra();
+    GetCameraPra();
     while (capture.read(frame_read))
     {
         threshold_frame = mythreshold(frame_read, 75);
@@ -75,7 +77,7 @@ int main() //6
         #ifdef SHOW_FRAMES
             imshow("threshold_frame", threshold_frame);
             imshow("frame_read", frame_read);
-            char c = waitKey(1);
+            char c = waitKey(10);
         #endif
 
         #ifdef SERIAL_SEND
