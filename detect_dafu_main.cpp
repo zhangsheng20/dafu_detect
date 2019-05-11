@@ -25,7 +25,7 @@ String video_file_name1= "/home/sheng/桌面/大符视频/2019-5-2_22-48-37.avi"
 String video_file_name = video_file_name1;
 
 
-int camWay = 1; // 0: MVcamera, 1: usb cam  2: vedio
+int camWay = 2; // 0: MVcamera, 1: usb cam  2: vedio
 Mat frame_read, gray;
 VideoCapture capture;
 Serial sel;
@@ -58,26 +58,26 @@ int main() //6
     GetCameraPra();
     while (capture.read(frame_read))
     {
-        threshold_frame = mythreshold(frame_read, 75);
+        threshold_frame = mythreshold(frame_read, 80);
 
         //连接连通域
         static Mat kernel_close = getStructuringElement(MORPH_RECT, Size(3,3), Point(-1, -1));
-        morphologyEx(threshold_frame, threshold_frame, MORPH_CLOSE, kernel_close);
+       // morphologyEx(threshold_frame, threshold_frame, MORPH_CLOSE, kernel_close);
 
         //去除噪点
         static Mat kernel_open = getStructuringElement(MORPH_RECT, Size(3, 3), Point(-1, -1));
-        morphologyEx(threshold_frame, threshold_frame, MORPH_OPEN, kernel_open);
+       // morphologyEx(threshold_frame, threshold_frame, MORPH_OPEN, kernel_open);
 
         DetectDafuArmor(threshold_frame, frame_read);
 
 
-        CoutFps();
-        cout << ShootArmourPitchYawError.x << "   " << ShootArmourPitchYawError.y << endl;
+        //CoutFps();
+        //cout << ShootArmourPitchYawError.x << "   " << ShootArmourPitchYawError.y << endl;
 
         #ifdef SHOW_FRAMES
             imshow("threshold_frame", threshold_frame);
             imshow("frame_read", frame_read);
-            char c = waitKey(10);
+            char c = waitKey(100);
         #endif
 
         #ifdef SERIAL_SEND
@@ -97,7 +97,7 @@ int OpenVideoStream(int camWay)
         capture.open(video_file_name); return true;
     }
     else if (camWay == 1) {
-        capture.open(1); return true;
+        capture.open(0); return true;
     }
     else if (camWay == 0) {
         return true;

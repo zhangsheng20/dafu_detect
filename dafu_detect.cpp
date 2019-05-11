@@ -44,12 +44,99 @@ int IsDetectDafuCenter = 0;
 Point2f DafuCenterPitchYawError;               //大符中心坐标
 Point2f ShootArmourPitchYawError;
 
+Point2f ShootArmourCenterFilter;
 
-void predcit(float angle_degree)
+
+FilterOutStep FilterShootArmourCenter;
+Point2f FilterOutStep::Filter(Point2f InputPixel,float InterframeError,int FilterLength )
 {
-    float angle_rad;
-        
+
+
+    LastInputPixel=CurrentInputPixel;
+    CurrentInputPixel=InputPixel;
+
+
+    float PixelLength=GetPixelLength(PixelRecord,CurrentInputPixel);
+
+    if( PixelLength > InterframeError)
+    {
+        if(jump_cnt==0)
+        {
+            PixelRecord=LastInputPixel;
+        }
+
+
+        jump_cnt++;
+        if(jump_cnt>=FilterLength)
+        {
+            jump_cnt=0;
+            return CurrentInputPixel;
+        }
+        else
+        {
+           return PixelRecord;
+        }
+    }
+    else
+    {
+       jump_cnt=0;
+       PixelRecord=CurrentInputPixel;
+      return CurrentInputPixel;
+
+    }
+
 }
+
+
+Point2f myFilter(Point2f InputPixel,float InterframeError,int FilterLength )
+{
+    static int jump_cnt=0;
+    static Point2f LastInputPixel=Point2f(320,200);
+    static Point2f CurrentInputPixel=Point2f(320,200);
+    static Point2f PixelRecord=Point2f(320,200);
+
+
+    LastInputPixel=CurrentInputPixel;
+    CurrentInputPixel=InputPixel;
+
+
+    float PixelLength=GetPixelLength(LastInputPixel,CurrentInputPixel);
+    cout<<PixelLength<<endl;
+
+     PixelLength=GetPixelLength(PixelRecord,CurrentInputPixel);
+    cout<<PixelLength<<"               "<<endl<<endl;
+
+
+    if( PixelLength > InterframeError)
+    {
+        if(jump_cnt==0)
+        {
+            PixelRecord=LastInputPixel;
+        }
+
+
+        jump_cnt++;
+        if(jump_cnt>=FilterLength)
+        {
+            jump_cnt=0;
+            return CurrentInputPixel;
+        }
+        else
+        {
+           return PixelRecord;
+        }
+    }
+    else
+    {
+       jump_cnt=0;
+       PixelRecord=CurrentInputPixel;
+      return CurrentInputPixel;
+
+    }
+
+}
+
+
 
 
 void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
@@ -294,7 +381,10 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
     }
 
 
+    ShootArmourCenterFilter=FilterShootArmourCenter.Filter(ShootArmourCenter,15,5);
+
     circle(dstImage, Point(ShootArmourCenter.x, ShootArmourCenter.y), 20, (0, 255, 255), 2);
+    circle(dstImage, Point(ShootArmourCenterFilter.x, ShootArmourCenterFilter.y), 20, (0, 255, 255), 2);
 
     ShootArmourPitchYawError = CaculatePitchYawError(ShootArmourCenter.x, ShootArmourCenter.y);
     DafuCenterPitchYawError=CaculatePitchYawError(DafuCenter.x, DafuCenter.y);
@@ -433,7 +523,7 @@ void GetCameraPra()
     capture.set(CAP_PROP_FRAME_HEIGHT, Camera_frame_height);//高度  分辨率设置成640*400时帧率是240
     capture.set(CAP_PROP_FOURCC, VideoWriter::fourcc('M', 'J', 'P', 'G'));
     capture.set(CAP_PROP_AUTO_EXPOSURE, 0.25);// where 0.25 means "manual exposure, manual iris"
-    capture.set(CAP_PROP_IRIS, 10);
+    capture.set(CAP_PROP_IRIS, 100);
     capture.set(CAP_PROP_EXPOSURE, -8);
 
     myVideoCaptureProperties[CAP_PROP_AUTO_EXPOSURE] = capture.get(CAP_PROP_AUTO_EXPOSURE);
