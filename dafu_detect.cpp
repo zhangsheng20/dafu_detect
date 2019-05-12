@@ -46,6 +46,30 @@ Point2f ShootArmourPitchYawError;
 
 Point2f ShootArmourCenterFilter;
 
+Point2f DafuCenter;               //大符中心坐标
+Point2f ShootArmourCenter;        //    需要打击的装甲板的中心坐标
+
+Point2f PredcitShootArmourCenter;
+Point2f PredcitShootArmourCenterPitchYawError;
+
+
+Point2f  predcit(float angle_degree,Mat frame) //calculate  predcit
+{
+    float theta=angle_degree/180*3.14;
+    float cos_theta = cos (theta);
+    float sin_theta = sin (theta);
+    Point2f tgt2center =    ShootArmourCenter - DafuCenter;
+    float x =cos_theta * tgt2center.x-sin_theta * tgt2center.y;
+    float y = sin_theta * tgt2center.x + cos_theta * tgt2center.y;
+    Point2f pred2center = Point2f(x,y);
+    Point2f pred=pred2center + DafuCenter;
+
+    circle(frame, pred, 5, (0, 255, 255), 2);
+
+    return pred;
+
+}
+
 
 FilterOutStep FilterShootArmourCenter;
 Point2f FilterOutStep::Filter(Point2f InputPixel,float InterframeError,int FilterLength )
@@ -141,8 +165,7 @@ Point2f myFilter(Point2f InputPixel,float InterframeError,int FilterLength )
 
 void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 {
-    Point2f DafuCenter;               //大符中心坐标
-    Point2f ShootArmourCenter;        //    需要打击的装甲板的中心坐标
+
     IsDetectDafuCenter = 0;
     int armor_cnt = 0;
     int dafu_center_cnt = 0;
@@ -388,6 +411,10 @@ void DetectDafuArmor(Mat &grayImage, Mat &dstImage)
 
     ShootArmourPitchYawError = CaculatePitchYawError(ShootArmourCenter.x, ShootArmourCenter.y);
     DafuCenterPitchYawError=CaculatePitchYawError(DafuCenter.x, DafuCenter.y);
+
+
+    PredcitShootArmourCenter=predcit(20,dstImage);
+    PredcitShootArmourCenterPitchYawError=CaculatePitchYawError(PredcitShootArmourCenter.x,PredcitShootArmourCenter.y);
     float b = 0;
 
 

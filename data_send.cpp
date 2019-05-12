@@ -8,7 +8,7 @@ extern Point2f SendYawPitchErrorCurrent;
 extern int IsDetectDafuCenter;
 extern Point2f ShootArmourPitchYawError;        //    需要打击的装甲板的中心坐标
 extern Point2f DafuCenterPitchYawError;              //大符中心坐标
-
+extern Point2f PredcitShootArmourCenter;
 extern Serial sel;
 
 
@@ -17,15 +17,17 @@ extern Serial sel;
 //自瞄34 yaw pitch
 void SendDataToInfantry()
 {
-      // SendYawPitchErrorCurrent.x=-9.6;
-      //SendYawPitchErrorCurrent.y=-8.6;
+    // SendYawPitchErrorCurrent.x=-9.6;
+    //SendYawPitchErrorCurrent.y=-8.6;
 
 
-    char buff[8];
-    ShootArmourPitchYawError.x+=2.0;
-    ShootArmourPitchYawError.y+=3.0;
+  char buff[8];
+  //ShootArmourPitchYawError.x+=2.0;
+  //ShootArmourPitchYawError.y+=-20.0;
 
-    Data_Code( (int)(-ShootArmourPitchYawError.x*100),  (int)(-ShootArmourPitchYawError.y*100));
+  //Data_Code( (int)(-ShootArmourPitchYawError.x*100),  (int)(-ShootArmourPitchYawError.y*100));
+  //Data_Code( (int)(-PredcitShootArmourCenterPitchYawError.x*100),  (int)(-PredcitShootArmourCenterPitchYawError.y*100));
+  Data_Code( (int)((PredcitShootArmourCenter.x-320)*100),  (int)((PredcitShootArmourCenter.y-250)*100));
     for (int i = 0; i < 8; i++)
         buff[i] = data_send_buf[i];
 
